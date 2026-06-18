@@ -300,9 +300,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; touch-action: none; ba
       else if (score === 2) label = 'Отличный результат!';
       else if (score === 1) label = 'Неплохо, но есть куда расти!';
       else                  label = 'Попробуй ещё раз!';
-      document.getElementById('result-text').innerHTML =
-        label + '<br>Твой уровень знаний
-      document.getElementById('result-text').innerHTML =
+           document.getElementById('result-text').innerHTML =
         label + '<br>Твой уровень знаний:<br>' + score + ' из 3 баллов';
       resetForm();
     }

@@ -3,32 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Корги Карусель</title>
+    <title>Корги Интерактив</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
         }
         body {
-            font-family: Arial, sans-serif;
-            background: #111;
+            background: #0f0f12;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
-        #game-container {
+        
+        /* Контейнер-баннер (имитация мобильного поста) */
+        #game-poster {
             width: 100%;
-            max-width: 450px;
-            height: 100vh;
-            max-height: 800px;
+            max-width: 430px; /* Размер стандартного экрана смартфона */
+            height: 92vh;
+            max-height: 840px;
             position: relative;
             overflow: hidden;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
             background: #000;
-            border-radius: 16px;
         }
+
         .screen {
             position: absolute;
             top: 0;
@@ -38,238 +43,179 @@
             display: none;
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
         }
         .screen.active {
             display: block;
         }
 
-        /* Экран 1: Обложка */
+        /* Экран 1: Обложка (чистая картинка-ссылка) */
         #screen-cover {
             background-image: url('cover.png');
             cursor: pointer;
         }
-        .start-btn-container {
-            position: absolute;
-            bottom: 10%;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-        }
-        .btn-img {
-            width: 200px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .btn-img:hover {
-            transform: scale(1.05);
-        }
 
         /* Экран 2: Видео */
+        #screen-video {
+            cursor: pointer;
+        }
         #screen-video video {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
-        /* Экраны свайпа (Лондон) */
-        .london-screen {
+        /* Экраны 3-6: Фон Лондон */
+        .london-bg {
             background-image: url('london-bg.png');
         }
-        .character {
+        
+        /* Накладываемые персонажи */
+        .corgi-overlay {
             position: absolute;
             top: 45%;
             left: 50%;
             transform: translate(-50%, -50%);
-            max-width: 80%;
-            max-height: 50%;
+            max-width: 85%;
+            max-height: 55%;
             object-fit: contain;
-        }
-        .ui-buttons {
-            position: absolute;
-            bottom: 8%;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            padding: 0 20px;
-        }
-        .ui-buttons img {
-            width: 100px;
-            height: auto;
-            cursor: pointer;
+            pointer-events: none; /* чтобы не мешать свайпу */
         }
 
-        /* Навигация для свайпа (стрелочки для десктопа / зоны клика) */
-        .nav-zone {
+        /* Интерфейсные кнопки внизу экранов */
+        .bottom-buttons {
             position: absolute;
-            top: 0;
-            bottom: 15%;
-            width: 15%;
-            z-index: 10;
+            bottom: 6%;
+            width: 100%;
             display: flex;
-            align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 2rem;
-            cursor: pointer;
-            background: rgba(0,0,0,0.05);
-            user-select: none;
+            gap: 15px;
+            padding: 0 20px;
+            z-index: 5;
         }
-        .nav-left { left: 0; }
-        .nav-right { right: 0; }
+        .bottom-buttons img {
+            width: 43%;
+            max-width: 160px;
+            height: auto;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .bottom-buttons img:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <div id="screen-cover" class="screen active" onclick="startGame()">
-        <div class="start-btn-container">
-            <img src="btn-default.png" class="btn-img" alt="Старт">
-        </div>
-    </div>
+<div id="game-poster">
+    
+    <div id="screen-cover" class="screen active" onclick="startGame()"></div>
 
-    <div id="screen-video" class="screen">
-        <video id="game-video" playsinline poster="preview-thumb.jpg">
+    <div id="screen-video" class="screen" onclick="handleVideoClick()">
+        <video id="main-video" playsinline poster="preview-thumb.jpg">
             <source src="preview.mp4" type="video/mp4">
         </video>
     </div>
 
-    <div class="screen london-screen carousel-screen" data-index="0">
-        <img src="corgi-shock.png" class="character" alt="Corgi Shock">
-        <div class="ui-buttons">
-            <img src="btn-success.png" alt="Success">
-            <img src="btn-error.png" alt="Error">
+    <div class="screen london-bg carousel-screen">
+        <img src="corgi-shock.png" class="corgi-overlay" alt="Shock">
+        <div class="bottom-buttons">
+            <img src="btn-success.png" alt="Yes">
+            <img src="btn-error.png" alt="No">
         </div>
     </div>
 
-    <div class="screen london-screen carousel-screen" data-index="1">
-        <img src="corgi-strange.png" class="character" alt="Corgi Strange">
-        <div class="ui-buttons">
-            <img src="btn-default.png" alt="Default">
-            <img src="btn-success.png" alt="Success">
+    <div class="screen london-bg carousel-screen">
+        <img src="corgi-strange.png" class="corgi-overlay" alt="Strange">
+        <div class="bottom-buttons">
+            <img src="btn-default.png" alt="Option">
+            <img src="btn-success.png" alt="Yes">
         </div>
     </div>
 
-    <div class="screen london-screen carousel-screen" data-index="2">
-        <img src="corgi-freddie.png" class="character" alt="Corgi Freddie">
-        <div class="ui-buttons">
-            <img src="btn-error.png" alt="Error">
-            <img src="btn-default.png" alt="Default">
+    <div class="screen london-bg carousel-screen">
+        <img src="corgi-freddie.png" class="corgi-overlay" alt="Freddie">
+        <div class="bottom-buttons">
+            <img src="btn-error.png" alt="No">
+            <img src="btn-default.png" alt="Option">
         </div>
     </div>
 
-    <div id="nav-left" class="nav-zone nav-left" style="display: none;" onclick="prevSlide()">‹</div>
-    <div id="nav-right" class="nav-zone nav-right" style="display: none;" onclick="nextSlide()">›</div>
 </div>
 
 <script>
-    const video = document.getElementById('game-video');
+    const video = document.getElementById('main-video');
+    const coverScreen = document.getElementById('screen-cover');
     const videoScreen = document.getElementById('screen-video');
     const carouselScreens = document.querySelectorAll('.carousel-screen');
-    const navLeft = document.getElementById('nav-left');
-    const navRight = document.getElementById('nav-right');
     
     let currentSlide = 0;
-    let videoLoopCount = 0;
+    let isVideoLooped = false;
 
-    // Смена экранов
-    function switchScreen(fromId, toElement) {
-        if (typeof fromId === 'string') {
-            document.getElementById(fromId).classList.remove('active');
-        } else {
-            fromId.classList.remove('active');
-        }
-        toElement.classList.add('active');
-    }
-
-    // 1. Нажатие на обложку -> Запуск видео
+    // 1. Старт с обложки
     function startGame() {
-        switchScreen('screen-cover', videoScreen);
+        coverScreen.classList.remove('active');
+        videoScreen.classList.add('active');
         video.play();
     }
 
-    // 2. Логика клика по видео
-    videoScreen.addEventListener('click', () => {
-        const currentTime = video.currentTime;
-
-        if (videoLoopCount === 0) {
-            // Первый круг: реагирует только с 6.25 секунд
-            if (currentTime >= 6.25) {
-                goToCarousel();
+    // 2. Клик по видео (учитывает 6.25 сек на первом круге)
+    function handleVideoClick() {
+        if (!isVideoLooped) {
+            if (video.currentTime >= 6.25) {
+                startCarousel();
             }
         } else {
-            // Последующие круги: реагирует в любой момент
-            goToCarousel();
+            startCarousel();
         }
-    });
+    }
 
-    // Отслеживаем окончание первого круга видео
+    // Зацикливание видео, если первый круг прошли без клика
     video.addEventListener('ended', () => {
-        videoLoopCount++;
-        video.loop = true; // Теперь видео будет зациклено
+        isVideoLooped = true;
+        video.loop = true;
         video.play();
     });
 
-    // Переход к карусели (Экран 3)
-    function goToCarousel() {
+    // Переход к карусели
+    function startCarousel() {
         video.pause();
-        switchScreen(videoScreen, carouselScreens[0]);
-        currentSlide = 0;
-        updateNavButtons();
+        videoScreen.classList.remove('active');
+        carouselScreens[0].add('active');
+        initSwipe();
     }
 
-    // 3. Управление каруселью (Свайп / Клик по стрелкам)
-    function showSlide(index) {
-        carouselScreens.forEach(screen => screen.classList.remove('active'));
-        carouselScreens[index].add('active');
-        currentSlide = index;
-        updateNavButtons();
-    }
+    // 3. Логика свайпов (Туда-сюда между 3, 4 и 5 экранами)
+    function initSwipe() {
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const poster = document.getElementById('game-poster');
 
-    function nextSlide() {
-        if (currentSlide < carouselScreens.length - 1) {
-            switchScreen(carouselScreens[currentSlide], carouselScreens[currentSlide + 1]);
-            currentSlide++;
-            updateNavButtons();
-        }
-    }
+        poster.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
 
-    function prevSlide() {
-        if (currentSlide > 0) {
-            switchScreen(carouselScreens[currentSlide], carouselScreens[currentSlide - 1]);
-            currentSlide--;
-            updateNavButtons();
-        }
-    }
+        poster.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
 
-    function updateNavButtons() {
-        // Показываем стрелки управления только на экранах карусели
-        navLeft.style.display = currentSlide > 0 ? 'flex' : 'none';
-        navRight.style.display = currentSlide < carouselScreens.length - 1 ? 'flex' : 'none';
-    }
-
-    // Добавление поддержки свайпов для мобильных устройств
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    document.getElementById('game-container').addEventListener('touchstart', e => {
-        touchStartX = e.changedTouches[0].screenX;
-    });
-
-    document.getElementById('game-container').addEventListener('touchend', e => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    });
-
-    function handleSwipe() {
-        // Проверяем, что мы сейчас на одном из экранов карусели
-        if (!carouselScreens[currentSlide].classList.contains('active')) return;
-
-        const swipeDistance = touchEndX - touchStartX;
-        if (swipeDistance < -50) {
-            nextSlide(); // Свайп влево -> следующий слайд
-        }
-        if (swipeDistance > 50) {
-            prevSlide(); // Свайп вправо -> предыдущий слайд
+        function handleSwipe() {
+            const swipeDistance = touchEndX - touchStartX;
+            
+            // Свайп влево -> Следующий экран
+            if (swipeDistance < -50 && currentSlide < carouselScreens.length - 1) {
+                carouselScreens[currentSlide].classList.remove('active');
+                currentSlide++;
+                carouselScreens[currentSlide].classList.add('active');
+            }
+            
+            // Свайп вправо -> Предыдущий экран
+            if (swipeDistance > 50 && currentSlide > 0) {
+                carouselScreens[currentSlide].classList.remove('active');
+                currentSlide--;
+                carouselScreens[currentSlide].classList.add('active');
+            }
         }
     }
 </script>

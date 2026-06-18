@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Corgi Quiz</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; overflow:hidden; background:#000; font-family:sans-serif; }
+
+  #carousel { position:relative; width:100vw; height:100vh; overflow:hidden; }
+  .track { display:flex; height:100%; transition:transform .4s ease; }
+  .slide {
+    flex:0 0 100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:24px; position:relative;
+  }
+
+  /* Экран 1 — обложка-кнопка */
+  #screen1 { background:#000; }
+  #cover {
+    width:100%; height:100%;
+    object-fit:cover;       /* красиво на весь экран */
+    cursor:pointer;
+  }
+
+  /* Экран 2 — видео */
+  #screen2 { background:#000; }
+  #video { width:100%; height:100%; object-fit:cover; }
+
+  /* Экраны 3-6 — заглушки */
+  #screen3 { background:#2d3a55; }
+  #screen4 { background:#3a4d2d; }
+  #screen5 { background:#553a2d; }
+  #screen6 { background:#4d2d55; }
+</style>
+</head>
+<body>
+
+<div id="carousel">
+  <div class="track" id="track">
+
+    <!-- Экран 1: обложка = кнопка -->
+    <div class="slide" id="screen1">
+      <img id="cover" src="cover.png" alt="cover">
+    </div>
+
+    <!-- Экран 2: видео со звуком -->
+    <div class="slide" id="screen2">
+      <video id="video" src="preview.mp4" loop playsinline></video>
+    </div>
+
+    <!-- Экраны 3-6: фоны -->
+    <div class="slide" id="screen3">Экран 3 (фон)</div>
+    <div class="slide" id="screen4">Экран 4 (фон)</div>
+    <div class="slide" id="screen5">Экран 5 (фон)</div>
+    <div class="slide" id="screen6">Экран 6 (фон)</div>
+
+  </div>
+</div>
+
+<script>
+  const track  = document.getElementById('track');
+  const cover  = document.getElementById('cover');
+  const video  = document.getElementById('video');
+
+  let current = 0;            // текущий экран 0..5
+  let swipeEnabled = false;   // свайп только с экрана 3
+
+  // --- видео: реакция на нажатие ---
+  let videoReactive = false;  // реагирует ли клик прямо сейчас
+  let loopCount = 0;          // сколько раз видео прокрутилось
+
+  function goTo(i){
+    current = i;
+    track.style.transform = 'translateX(' + (-100*i) + '%)';
+    swipeEnabled = (current >= 2);   // свайп с экрана 3 (индекс 2)
+  }
+
+  // 1) Клик по обложке -> экран 2, запускаем видео СО ЗВУКОМ
+  cover.addEventListener('click', () => {
+    goTo(1);
+    video.muted = false;       // звук есть (разрешён, т.к. был клик)
+    video.currentTime = 0;
+    loopCount = 0;
+    videoReactive = false;
+    video.play();
+  });
+
+  // 2) Логика видео: с 6.25 сек реагирует на клик
+  video.addEventListener('timeupdate', () => {
+    if (video.currentTime >= 6.25) videoReactive = true;
+  });
+  // после 1-го полного прохода — реагирует постоянно
+  video.addEventListener('seeked', () => {});
+  let lastTime = 0;
+  video.addEventListener('timeupdate', () => {
+    if (lastTime > video.currentTime - 0.1 && lastTime > 1 && video.currentTime < 0.5) {
+      loopCount++;
+      if (loopCount >= 1) videoReactive = true; // со 2-го прохода всегда
+    }
+    lastTime = video.currentTime;
+  });
+
+  // клик по видео -> экран 3 (если реагирует)
+  video.addEventListener('click', () => {
+    if (videoReactive) {
+      video.pause();
+      goTo(2);
+    }
+  });
+
+  // 3) Свайпы (экраны 3-6 по кругу: 2<->3<->4<->5, 5 -> назад к 2)
+  let startX = 0;
+  function handleSwipe(dx){
+    if (!swipeEnabled) return;
+    if (dx < -50) {              // свайп влево = вперёд
+      if (current < 5) goTo(current+1);
+      else goTo(2);              // с последнего -> назад к экрану 3
+    } else if (dx > 50) {        // свайп вправо = назад
+      if (current > 2) goTo(current-1);
+    }
+  }
+  // палец
+  track.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+  track.addEventListener('touchend',   e => handleSwipe(e.changedTouches[0].clientX - startX));
+  // мышь
+  let mouseDown = false;
+  track.addEventListener('mousedown', e => { mouseDown=true; startX=e.clientX; });
+  track.addEventListener('mouseup',   e => { if(mouseDown){ handleSwipe(e.clientX-startX); mouseDown=false; } });
+  // стрелки
+  document.addEventListener('keydown', e => {
+    if (e.key==='ArrowLeft')  handleSwipe(60);
+    if (e.key==='ArrowRight') handleSwipe(-60);
+  });
+
+  goTo(0);
+</script>
+</body>
+</html>

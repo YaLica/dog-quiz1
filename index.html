@@ -9,7 +9,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Corgi Quiz">
 <meta property="og:description" content="Пройди квиз с корги по Лондону!">
-<meta property="og:image" content="https://yalica.github.io/dog-quiz1/preview-thumb.jpg">
+<meta property="og:image" content="https://yalica.github.io/dog-quiz1/cover.png">
 <meta property="og:url" content="https://yalica.github.io/dog-quiz1/">
 <meta name="twitter:card" content="summary_large_image">
 
@@ -31,7 +31,6 @@
     overflow:hidden;
     background:#000;
   }
-  /* если экран узкий — ограничиваем по ширине */
   @media (max-aspect-ratio: 9/16){
     #carousel { width:100vw; height:auto; }
   }
@@ -43,15 +42,12 @@
     color:#fff; font-size:22px; position:relative;
   }
 
-  /* Экран 1 — обложка-кнопка */
   #screen1 { background:#000; }
   #cover { width:100%; height:100%; object-fit:cover; cursor:pointer; }
 
-  /* Экран 2 — видео */
   #screen2 { background:#000; }
   #video { width:100%; height:100%; object-fit:cover; }
 
-  /* Экраны 3-6 — фон Лондона */
   #screen3, #screen4, #screen5, #screen6 {
     background:url('london-bg.png') center/cover no-repeat;
   }
@@ -73,10 +69,10 @@
     </div>
 
     <!-- Экраны 3-6: фон Лондона -->
-    <div class="slide" id="screen3">Экран 3</div>
-    <div class="slide" id="screen4">Экран 4</div>
-    <div class="slide" id="screen5">Экран 5</div>
-    <div class="slide" id="screen6">Экран 6</div>
+    <div class="slide" id="screen3"></div>
+    <div class="slide" id="screen4"></div>
+    <div class="slide" id="screen5"></div>
+    <div class="slide" id="screen6"></div>
 
   </div>
 </div>
@@ -98,7 +94,6 @@
     swipeEnabled = (current >= 2);
   }
 
-  // Клик по обложке -> видео со звуком
   cover.addEventListener('click', () => {
     goTo(1);
     video.muted = false;
@@ -108,7 +103,6 @@
     video.play();
   });
 
-  // Видео: реагирует с 6.25 сек, после 1-го прохода — всегда
   video.addEventListener('timeupdate', () => {
     if (video.currentTime >= 6.25) videoReactive = true;
     if (lastTime > 1 && video.currentTime < 0.5) {
@@ -118,12 +112,10 @@
     lastTime = video.currentTime;
   });
 
-  // Клик по видео -> экран 3
   video.addEventListener('click', () => {
     if (videoReactive) { video.pause(); goTo(2); }
   });
 
-  // Свайпы (экраны 3-6)
   let startX = 0;
   function handleSwipe(dx){
     if (!swipeEnabled) return;
